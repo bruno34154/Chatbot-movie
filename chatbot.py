@@ -23,16 +23,22 @@ def fetchOneSingleMovie(movie):
     strmovies = arrayMovie[0]['overview']
     return strmovies
 
+def fetchMostPopularMovie():
+    requisicao = requests.get('https://api.themoviedb.org/3/movie/popular?api_key='+os.getenv('API_KEY')+'&language=pt-BR')
+    obj = json.loads(requisicao.content)
+    arrayMovie = obj['results']
+    popularMovie = ''
+    MostVoted = 0.0
+    for movie in arrayMovie:
+        if(movie['vote_average'] > MostVoted):
+            MostVoted = movie['vote_average']
+            popularMovie = movie['title']
+            
+    return popularMovie    
 
 chatbot = ChatBot('botzin')
 trainer = ListTrainer(chatbot)
-trainer.train(['Oi pode me sugerir filmes bons para assistir?',
-               '1- Claro!! Os filmes que sugiro são: ',
-                 'Estou interesado em Homem-Aranha',
-                 '2 - Interessante!! Eu ja assisti esse filme fala sobre',
-                 'Como é esse filme Miraculos?',
-                 '2 - Eu Sei sobre ele!! ele é basicamente'
-                 ]) #Aqui dentor é onde eu treino a ia passando dialogos
+trainer.train('conversaTreino.yml') #Aqui dentor é onde eu treino a ia passando dialogos
 
 while True:
     pergunta = input("Usuario: ")
@@ -43,6 +49,8 @@ while True:
     if(str(resposta).startswith('2')):
         frase = pergunta.split(' ')
         moviesres = fetchOneSingleMovie(frase[-1])
+    if(str(resposta).startswith('3')):
+        moviesres = fetchMostPopularMovie()
     if(float(resposta.confidence)>0.5):
         print(str(resposta) + " " + moviesres)
     else:
